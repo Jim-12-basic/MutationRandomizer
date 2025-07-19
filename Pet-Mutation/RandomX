@@ -1,0 +1,39 @@
+local p = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
+local f = Instance.new("Frame", gui) f.Size = UDim2.new(0,300,0,200) f.Position = UDim2.new(0.5,-150,0.5,-100) f.BackgroundColor3 = Color3.fromRGB(40,40,40)
+local title = Instance.new("TextLabel", f) title.Size = UDim2.new(1,0,0,30) title.Text = "Mutation Randomizer" title.BackgroundColor3 = Color3.fromRGB(70,70,70) title.TextColor3 = Color3.new(1,1,1) title.Font = Enum.Font.GothamBold title.TextSize = 16
+local label = Instance.new("TextLabel", f) label.Position = UDim2.new(0,0,0,35) label.Size = UDim2.new(1,0,0,30) label.BackgroundTransparency = 1 label.Text = "Mutation: None" label.TextColor3 = Color3.fromRGB(0,255,127) label.Font = Enum.Font.Gotham label.TextSize = 18
+local btn = Instance.new("TextButton", f) btn.Position = UDim2.new(0.1,0,0.5,0) btn.Size = UDim2.new(0.35,0,0,40) btn.Text = "Reroll" btn.BackgroundColor3 = Color3.fromRGB(60,120,255) btn.TextColor3 = Color3.new(1,1,1) btn.Font = Enum.Font.GothamBold btn.TextSize = 16
+local abtn = Instance.new("TextButton", f) abtn.Position = UDim2.new(0.55,0,0.5,0) abtn.Size = UDim2.new(0.35,0,0,40) abtn.Text = "Auto: OFF" abtn.BackgroundColor3 = Color3.fromRGB(255,100,100) abtn.TextColor3 = Color3.new(1,1,1) abtn.Font = Enum.Font.GothamBold abtn.TextSize = 16
+
+local muts = {"Fire Fur","Ice Horns","Golden Eyes","Shadow Wings","Glowing Paws","Rainbow Tail","Crystal Skin","Plant Aura"}
+local auto = false
+
+local function roll(t)
+	for i = 1, t*2 do
+		label.Text = "Mutation: "..muts[math.random(1,#muts)]
+		wait(0.5)
+	end
+end
+
+btn.MouseButton1Click:Connect(function()
+	btn.Text = "Rerolling..."
+	btn.AutoButtonColor = false
+	roll(20)
+	btn.Text = "Reroll"
+	btn.AutoButtonColor = true
+end)
+
+abtn.MouseButton1Click:Connect(function()
+	auto = not auto
+	abtn.Text = "Auto: " .. (auto and "ON" or "OFF")
+	abtn.BackgroundColor3 = auto and Color3.fromRGB(0,200,0) or Color3.fromRGB(255,100,100)
+	if auto then
+		coroutine.wrap(function()
+			while auto do
+				roll(5)
+				wait(40)
+			end
+		end)()
+	end
+end)
