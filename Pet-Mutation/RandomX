@@ -1,120 +1,139 @@
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui")
-gui.Name = "MutatorGUI"
-gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
+--// FALCONX Mutation Randomizer Visual-Only GUI for Grow a Garden
 
--- Loading
-local loading = Instance.new("TextLabel", gui)
-loading.Size = UDim2.new(1,0,1,0)
-loading.BackgroundColor3 = Color3.new(0,0,0)
-loading.TextColor3 = Color3.new(1,1,1)
-loading.Font = Enum.Font.GothamBold
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MutationUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Loading Screen
+local loading = Instance.new("TextLabel", screenGui)
+loading.Size = UDim2.new(1, 0, 1, 0)
+loading.Text = "Loading FALCONX Mutation UI..."
 loading.TextScaled = true
-loading.Text = "FALCONX\nLoading..."
+loading.Font = Enum.Font.GothamBlack
+loading.TextColor3 = Color3.new(1, 1, 1)
+loading.BackgroundColor3 = Color3.fromRGB(10,10,10)
+
 wait(2)
 loading:Destroy()
 
--- UI Frame
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,300,0,200)
-frame.Position = UDim2.new(0.5,-150,0.5,-100)
-frame.BackgroundColor3 = Color3.fromRGB(30,30,40)
-Instance.new("UICorner", frame)
+-- Main Frame
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 300, 0, 250)
+frame.Position = UDim2.new(0.5, -150, 0.5, -125)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BorderSizePixel = 0
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0,30)
-title.Position = UDim2.new(0,0,0,0)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.Text = "Pet Mutation Randomizer"
-title.TextColor3 = Color3.new(1,1,1)
+-- UI Corner
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 12)
 
+-- UI Gradient
+local gradient = Instance.new("UIGradient", frame)
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 100, 100)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 255, 100)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 100, 255))
+}
+gradient.Rotation = 45
+
+-- Mutation Label
 local label = Instance.new("TextLabel", frame)
-label.Size = UDim2.new(1,0,0,30)
-label.Position = UDim2.new(0,0,0,35)
+label.Size = UDim2.new(1, -20, 0, 40)
+label.Position = UDim2.new(0, 10, 0, 10)
 label.BackgroundTransparency = 1
 label.Font = Enum.Font.GothamBold
-label.TextSize = 20
 label.Text = "Mutation: None"
-label.TextColor3 = Color3.fromRGB(0,255,127)
+label.TextScaled = true
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-local rerollBtn = Instance.new("TextButton", frame)
-rerollBtn.Size = UDim2.new(0.4,0,0,40)
-rerollBtn.Position = UDim2.new(0.05,0,0.6,0)
-rerollBtn.Font = Enum.Font.GothamBold
-rerollBtn.TextSize = 18
-rerollBtn.Text = "Reroll"
-rerollBtn.BackgroundColor3 = Color3.fromRGB(60,120,255)
-rerollBtn.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", rerollBtn)
+-- Reroll Button
+local reroll = Instance.new("TextButton", frame)
+reroll.Size = UDim2.new(0.9, 0, 0, 40)
+reroll.Position = UDim2.new(0.05, 0, 0, 60)
+reroll.Text = "Reroll Mutation (13s)"
+reroll.Font = Enum.Font.Gotham
+reroll.TextScaled = true
+reroll.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+reroll.TextColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", reroll).CornerRadius = UDim.new(0, 8)
 
-local autoBtn = Instance.new("TextButton", frame)
-autoBtn.Size = UDim2.new(0.4,0,0,40)
-autoBtn.Position = UDim2.new(0.55,0,0.6,0)
-autoBtn.Font = Enum.Font.GothamBold
-autoBtn.TextSize = 18
-autoBtn.Text = "Auto: OFF"
-autoBtn.BackgroundColor3 = Color3.fromRGB(255,80,80)
-autoBtn.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", autoBtn)
+-- Auto Button
+local auto = Instance.new("TextButton", frame)
+auto.Size = UDim2.new(0.9, 0, 0, 40)
+auto.Position = UDim2.new(0.05, 0, 0, 110)
+auto.Text = "Auto Reroll (40s)"
+auto.Font = Enum.Font.Gotham
+auto.TextScaled = true
+auto.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+auto.TextColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", auto).CornerRadius = UDim.new(0, 8)
 
--- Mutation list and rare flags
-local muts = {
-  {"Shiny",10,false}, {"Windy",10,false}, {"Frozen",10,false},
-  {"Shocked",10,false},{"Golden",10,false},{"Inverted",7,false},
-  {"Mega",3,false},{"Tiny",3,false},{"Ironskin",3,false},
-  {"Ascended",1,true},{"Radiant",1,true},{"Rainbow",1,true}
+-- Mutation List
+local mutations = {
+	{"Shiny", 10}, {"Windy", 10}, {"Frozen", 10}, {"Shocked", 10}, {"Golden", 8},
+	{"Mega", 3}, {"Inverted", 5}, {"Tiny", 2}, {"Ironskin", 2},
+	{"Ascended", 1}, {"Radiant", 1}, {"Rainbow", 1}
 }
 
-local function getMutation()
-  local total = 0
-  for _,m in ipairs(muts) do total += m[2] end
-  local rnd = math.random(total)
-  local cum = 0
-  for _,m in ipairs(muts) do
-    cum += m[2]
-    if rnd <= cum then return m[1], m[3] end
-  end
+-- Rainbow animation
+coroutine.wrap(function()
+	local t = 0
+	while label do
+		local r = math.sin(t) * 127 + 128
+		local g = math.sin(t + 2) * 127 + 128
+		local b = math.sin(t + 4) * 127 + 128
+		label.TextColor3 = Color3.fromRGB(r, g, b)
+		t += 0.05
+		wait(0.03)
+	end
+end)()
+
+-- Weighted Random
+local function getRandomMutation()
+	local totalWeight = 0
+	for _, m in pairs(mutations) do totalWeight += m[2] end
+	local rand = math.random(1, totalWeight)
+	local counter = 0
+	for _, m in pairs(mutations) do
+		counter += m[2]
+		if rand <= counter then return m[1] end
+	end
 end
 
-local function roll(cd)
-  for i = cd,1,-1 do
-    label.Text = "Rolling... "..i.."s"
-    wait(1)
-  end
-  local name, rare = getMutation()
-  label.Text = "Mutation: "..name
-  if rare then
-    -- simple flash effect
-    for _=1,3 do
-      label.TextColor3 = Color3.fromRGB(255,215,0)
-      wait(0.2)
-      label.TextColor3 = Color3.fromRGB(0,255,127)
-      wait(0.2)
-    end
-  end
+-- Roll Logic
+local function rollOnce(duration)
+	for i = duration, 1, -1 do
+		label.Text = "Rolling... " .. i .. "s"
+		wait(1)
+	end
+	local mutation = getRandomMutation()
+	label.Text = "Mutation: " .. mutation
 end
 
--- Hook buttons
-rerollBtn.MouseButton1Click:Connect(function()
-  rerollBtn.Active = false
-  roll(20)
-  rerollBtn.Active = true
+local autoRunning = false
+local function startAuto()
+	if autoRunning then return end
+	autoRunning = true
+	while autoRunning do
+		rollOnce(13)
+		wait(27) -- 40s total
+	end
+end
+
+-- Button Events
+reroll.MouseButton1Click:Connect(function()
+	if not autoRunning then rollOnce(13) end
 end)
 
-local auto = false
-autoBtn.MouseButton1Click:Connect(function()
-  auto = not auto
-  autoBtn.Text = "Auto: "..(auto and "ON" or "OFF")
-  autoBtn.BackgroundColor3 = auto and Color3.fromRGB(60,200,80) or Color3.fromRGB(255,80,80)
-  if auto then
-    coroutine.wrap(function()
-      while auto do
-        roll(1) -- short visual only flash
-        wait(40)
-      end
-    end)()
-  end
+auto.MouseButton1Click:Connect(function()
+	if autoRunning then
+		autoRunning = false
+		auto.Text = "Auto Reroll (40s)"
+	else
+		auto.Text = "Auto: Running..."
+		startAuto()
+	end
 end)
