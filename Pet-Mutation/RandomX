@@ -1,39 +1,112 @@
 local p = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
-local f = Instance.new("Frame", gui) f.Size = UDim2.new(0,300,0,200) f.Position = UDim2.new(0.5,-150,0.5,-100) f.BackgroundColor3 = Color3.fromRGB(40,40,40)
-local title = Instance.new("TextLabel", f) title.Size = UDim2.new(1,0,0,30) title.Text = "Mutation Randomizer" title.BackgroundColor3 = Color3.fromRGB(70,70,70) title.TextColor3 = Color3.new(1,1,1) title.Font = Enum.Font.GothamBold title.TextSize = 16
-local label = Instance.new("TextLabel", f) label.Position = UDim2.new(0,0,0,35) label.Size = UDim2.new(1,0,0,30) label.BackgroundTransparency = 1 label.Text = "Mutation: None" label.TextColor3 = Color3.fromRGB(0,255,127) label.Font = Enum.Font.Gotham label.TextSize = 18
-local btn = Instance.new("TextButton", f) btn.Position = UDim2.new(0.1,0,0.5,0) btn.Size = UDim2.new(0.35,0,0,40) btn.Text = "Reroll" btn.BackgroundColor3 = Color3.fromRGB(60,120,255) btn.TextColor3 = Color3.new(1,1,1) btn.Font = Enum.Font.GothamBold btn.TextSize = 16
-local abtn = Instance.new("TextButton", f) abtn.Position = UDim2.new(0.55,0,0.5,0) abtn.Size = UDim2.new(0.35,0,0,40) abtn.Text = "Auto: OFF" abtn.BackgroundColor3 = Color3.fromRGB(255,100,100) abtn.TextColor3 = Color3.new(1,1,1) abtn.Font = Enum.Font.GothamBold abtn.TextSize = 16
+local sgui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
+sgui.Name = "FalconX_Mutator"
 
-local muts = {"Fire Fur","Ice Horns","Golden Eyes","Shadow Wings","Glowing Paws","Rainbow Tail","Crystal Skin","Plant Aura"}
-local auto = false
+-- Loading screen
+local load = Instance.new("TextLabel", sgui)
+load.Size = UDim2.new(1,0,1,0)
+load.Text = "Loading Mutation GUI...\nBy FALCONX"
+load.TextColor3 = Color3.new(1,1,1)
+load.BackgroundColor3 = Color3.fromRGB(0,0,0)
+load.TextScaled = true
+load.Font = Enum.Font.GothamBold
+wait(2)
+load:Destroy()
 
-local function roll(t)
-	for i = 1, t*2 do
-		label.Text = "Mutation: "..muts[math.random(1,#muts)]
+-- GUI Setup
+local f = Instance.new("Frame", sgui)
+f.Size = UDim2.new(0, 350, 0, 250)
+f.Position = UDim2.new(0.5, -175, 0.5, -125)
+f.BackgroundColor3 = Color3.fromRGB(25,25,35)
+Instance.new("UICorner", f).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", f).Color = Color3.fromRGB(150, 255, 200)
+
+local title = Instance.new("TextLabel", f)
+title.Size = UDim2.new(1, 0, 0, 35)
+title.Text = "🐾 Pet Mutation Randomizer"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.BackgroundTransparency = 1
+
+local label = Instance.new("TextLabel", f)
+label.Position = UDim2.new(0, 0, 0, 50)
+label.Size = UDim2.new(1, 0, 0, 30)
+label.BackgroundTransparency = 1
+label.Text = "Mutation: None"
+label.TextColor3 = Color3.fromRGB(0,255,127)
+label.Font = Enum.Font.GothamBold
+label.TextSize = 22
+
+local btn = Instance.new("TextButton", f)
+btn.Position = UDim2.new(0.1, 0, 0.6, 0)
+btn.Size = UDim2.new(0.35, 0, 0, 40)
+btn.Text = "🎲 Reroll"
+btn.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
+btn.TextColor3 = Color3.new(1,1,1)
+btn.Font = Enum.Font.GothamBold
+btn.TextSize = 18
+Instance.new("UICorner", btn)
+
+local abtn = Instance.new("TextButton", f)
+abtn.Position = UDim2.new(0.55, 0, 0.6, 0)
+abtn.Size = UDim2.new(0.35, 0, 0, 40)
+abtn.Text = "Auto: OFF"
+abtn.BackgroundColor3 = Color3.fromRGB(255, 80, 100)
+abtn.TextColor3 = Color3.new(1,1,1)
+abtn.Font = Enum.Font.GothamBold
+abtn.TextSize = 18
+Instance.new("UICorner", abtn)
+
+-- Mutations (with rarity and effects)
+local mutations = {
+	{"shiny", 10}, {"windy", 10}, {"frozen", 10}, {"shocked", 10}, {"golden", 10},
+	{"mega", 4}, {"tiny", 3}, {"inverted", 7}, {"Ironskin", 3},
+	{"Ascended", 1, true}, {"Radiant", 1, true}, {"Rainbow", 1, true}
+}
+
+-- Sound
+local rareSound = Instance.new("Sound", f)
+rareSound.SoundId = "rbxassetid://9118823104" -- sparkly ding
+rareSound.Volume = 1
+
+-- Particles
+local particle = Instance.new("ParticleEmitter", f)
+particle.Enabled = false
+particle.LightEmission = 1
+particle.Size = NumberSequence.new(1)
+particle.Color = ColorSequence.new(Color3.new(1,1,0), Color3.new(1,0,0))
+particle.Speed = NumberRange.new(5)
+particle.Texture = "rbxassetid://243660364"
+particle.Lifetime = NumberRange.new(1)
+particle.Rate = 100
+particle.ZOffset = 1
+
+-- Weighted roll
+local function getRandomMutation()
+	local pool = {}
+	for _, m in ipairs(mutations) do
+		for _ = 1, m[2] do table.insert(pool, m) end
+	end
+	return pool[math.random(1, #pool)]
+end
+
+-- Rolling animation
+local function roll(duration)
+	for i = duration, 1, -1 do
+		label.Text = "Rolling... " .. i .. "s"
+		wait(0.5)
+		local picked = getRandomMutation()
+		local name = picked[1]:upper()
+		label.Text = "Mutation: " .. name
+
+		if picked[3] then
+			rareSound:Play()
+			particle:Emit(50)
+		end
 		wait(0.5)
 	end
 end
 
-btn.MouseButton1Click:Connect(function()
-	btn.Text = "Rerolling..."
-	btn.AutoButtonColor = false
-	roll(20)
-	btn.Text = "Reroll"
-	btn.AutoButtonColor = true
-end)
-
-abtn.MouseButton1Click:Connect(function()
-	auto = not auto
-	abtn.Text = "Auto: " .. (auto and "ON" or "OFF")
-	abtn.BackgroundColor3 = auto and Color3.fromRGB(0,200,0) or Color3.fromRGB(255,100,100)
-	if auto then
-		coroutine.wrap(function()
-			while auto do
-				roll(5)
-				wait(40)
-			end
-		end)()
-	end
-end)
+-- Reroll button
+btn.MouseButto
